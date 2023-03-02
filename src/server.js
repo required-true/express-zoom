@@ -16,6 +16,21 @@ app.get('/*', (req, res) => res.redirect('/'))
 const httpServer = http.createServer(app)
 const wsServer = SocketIO(httpServer)
 
+function publicRooms() {
+  const { sockets: { adapter: { sids, rooms} } } = wsServer
+  const publicRooms =[]
+  rooms.forEach((value, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key)
+    }
+  })
+  return publicRooms
+}
+
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size
+}
+
 wsServer.on('connection', (socket) => {
 
   socket.onAny((event) => {
@@ -26,7 +41,8 @@ wsServer.on('connection', (socket) => {
     socket['nickname'] = nickName
     socket.join(roomName)
     done()
-    socket.to(roomName).emit('welcome', socket.nickname)
+    socket.to(roomName).emit('welcome', socket.nickname, countRoom(roomName))
+    wsServer.sockets.emit('room_change', publicRooms())
   })
 
   socket.on('new_message', (msg, room, done) => {
@@ -35,7 +51,11 @@ wsServer.on('connection', (socket) => {
   })
 
   socket.on('disconnecting', () => {
-    socket.rooms.forEach((roomName) => socket.to(roomName).emit('bye', socket.nickname))
+    socket.rooms.forEach((roomName) => socket.to(roomName).emit('bye', socket.nickname, countRoom(roomName) - 1))
+  })
+
+  socket.on('disconnect', () => {
+    wsServer.sockets.emit('room_change', publicRooms())
   })
 })
 
