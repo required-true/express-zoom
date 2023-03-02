@@ -4,19 +4,15 @@ html(lang="en")
     meta(charset="UTF-8")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    link(rel="stylesheet", href="https://unpkg.com/mvp.css@1.12/mvp.css")
     title Zoom
   body
     header
-      h1 Zoom 
-    main 
-      ul
-      
-      form#nickForm
-        input(type="text", placeholder="Write a Nickname", required)
-        button Send
-      form#messageForm
-        input(type="text", placeholder="Write a message", required)
-        button Send
-    
-    script(src='/public/js/app.js')
+      h1 Zoom
+    main
+      div#welcome
+        form
+          input(type="text", placeholder="room name", required)
+          button Enter Room
+
+    script(src="/socket.io/socket.io.js")
+    script(src="/public/js/app.js")
