@@ -14,11 +14,17 @@ app.get('/*', (req, res) => res.redirect('/'))
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 
+const socekts = [];
+
 wss.on('connection', (socket) => {
+  socekts.push(socket)
   console.log('Connected to Browser ✅')
   socket.on('close', () => (console.log('Disconnected from Browser ❌')))
-  socket.on('message', (message) => (console.log(message.toString('utf-8'))))
-  socket.send('Hello!!!')
+  socket.on('message', (message) => {
+    socekts.forEach((aSocket) => {
+      aSocket.send(message.toString('utf8'))
+    })
+  })
 })
 
 server.listen(3000, () => {
